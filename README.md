@@ -1,0 +1,1 @@
+# terraform-sn-platform-on-eks
