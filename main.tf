@@ -110,48 +110,14 @@ provider "kubernetes" {
   token = data.aws_eks_cluster_auth.default.token
 }
 
-resource "kubernetes_deployment" "nginx" {
+resource "kubernetes_namespace" "sns" {
   metadata {
-    name = "scalable-nginx-example"
-    labels = {
-      App = "ScalableNginxExample"
-    }
+    name = "sns"
   }
+}
 
-  spec {
-    replicas = 2
-    selector {
-      match_labels = {
-        App = "ScalableNginxExample"
-      }
-    }
-    template {
-      metadata {
-        labels = {
-          App = "ScalableNginxExample"
-        }
-      }
-      spec {
-        container {
-          image = "nginx:1.7.8"
-          name  = "example"
-
-          port {
-            container_port = 80
-          }
-
-          resources {
-            limits = {
-              cpu    = "0.5"
-              memory = "512Mi"
-            }
-            requests = {
-              cpu    = "250m"
-              memory = "50Mi"
-            }
-          }
-        }
-      }
-    }
+resource "kubernetes_namespace" "snp" {
+  metadata {
+    name = "snp"
   }
 }

@@ -17,3 +17,8 @@ output "cluster_name" {
   description = "Kubernetes Cluster Name"
   value       = module.eks.cluster_name
 }
+
+output "profile" {
+  description = "AWS profile"
+  value       = var.profile
+}
