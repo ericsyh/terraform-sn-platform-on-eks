@@ -110,14 +110,43 @@ provider "kubernetes" {
   token = data.aws_eks_cluster_auth.default.token
 }
 
-resource "kubernetes_namespace" "sns" {
+# resource "kubernetes_namespace" "sns" {
+#   metadata {
+#     name = "sns"
+#   }
+# }
+
+# resource "kubernetes_namespace" "snp" {
+#   metadata {
+#     name = "snp"
+#   }
+# }
+
+resource "kubernetes_namespace" "pulsar" {
   metadata {
-    name = "sns"
+    name = "pulsar"
   }
 }
 
-resource "kubernetes_namespace" "snp" {
-  metadata {
-    name = "snp"
+provider "helm" {
+  kubernetes {
+    host                   = data.aws_eks_cluster.default.endpoint
+    cluster_ca_certificate =  base64decode(data.aws_eks_cluster.default.certificate_authority[0].data)
+    token = data.aws_eks_cluster_auth.default.token
   }
+}
+
+resource "helm_release" "pulsar" {
+  name = "pulsar"
+  repository = "https://pulsar.apache.org/charts"
+  chart = "pulsar"
+  namespace = kubernetes_namespace.pulsar.metadata.0.name
+  depends_on = [
+    aws_eks_addon.ebs-csi
+  ]
+
+  values =[
+    "${file("pulsar.yaml")}"
+  ]
+  timeout = 600
 }

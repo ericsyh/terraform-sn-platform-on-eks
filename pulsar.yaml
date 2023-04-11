@@ -1,0 +1,57 @@
+initialize: true
+
+namespace: "pulsar"
+
+components:
+  # zookeeper
+  zookeeper: true
+  # bookkeeper
+  bookkeeper: true
+  # bookkeeper - autorecovery
+  autorecovery: true
+  # broker
+  broker: true
+  # functions
+  functions: true
+  # proxy
+  proxy: false
+  # toolset
+  toolset: true
+  # pulsar manager
+  pulsar_manager: true
+
+kube-prometheus-stack:
+  enabled: false
+  prometheus:
+    enabled: false
+  grafana:
+    enabled: false
+  prometheus-node-exporter:
+    enabled: false
+  alertmanager:
+    enabled: false
+
+zookeeper:
+  podMonitor:
+    enabled: false
+  replicaCount: 3
+
+bookkeeper:
+  podMonitor:
+    enabled: false
+  replicaCount: 3
+
+autorecovery:
+  podMonitor:
+    enabled: false
+  replicaCount: 1
+
+broker:
+  podMonitor:
+    enabled: false
+  replicaCount: 3
+
+proxy:
+  podMonitor:
+    enabled: false
+  replicaCount: 1
