@@ -18,7 +18,7 @@ module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "3.19.0"
 
-  name = "education-vpc"
+  name = "ericsyh-vpc-${random_string.suffix.result}"
 
   cidr = "10.0.0.0/16"
   azs  = slice(data.aws_availability_zones.available.names, 0, 3)
@@ -98,10 +98,16 @@ resource "aws_eks_addon" "ebs-csi" {
 
 data "aws_eks_cluster" "default" {
   name = module.eks.cluster_name
+  depends_on = [
+    aws_eks_addon.ebs-csi
+  ]
 }
 
 data "aws_eks_cluster_auth" "default" {
   name = module.eks.cluster_name
+  depends_on = [
+    aws_eks_addon.ebs-csi
+  ]
 }
 
 provider "kubernetes" {
@@ -110,23 +116,23 @@ provider "kubernetes" {
   token = data.aws_eks_cluster_auth.default.token
 }
 
-# resource "kubernetes_namespace" "sns" {
-#   metadata {
-#     name = "sns"
-#   }
-# }
-
-# resource "kubernetes_namespace" "snp" {
-#   metadata {
-#     name = "snp"
-#   }
-# }
-
-resource "kubernetes_namespace" "pulsar" {
+resource "kubernetes_namespace" "sns" {
   metadata {
-    name = "pulsar"
+    name = "sns"
   }
 }
+
+resource "kubernetes_namespace" "snp" {
+  metadata {
+    name = "snp"
+  }
+}
+
+# resource "kubernetes_namespace" "pulsar" {
+#   metadata {
+#     name = "pulsar"
+#   }
+# }
 
 provider "helm" {
   kubernetes {
@@ -136,17 +142,50 @@ provider "helm" {
   }
 }
 
-resource "helm_release" "pulsar" {
-  name = "pulsar"
-  repository = "https://pulsar.apache.org/charts"
-  chart = "pulsar"
-  namespace = kubernetes_namespace.pulsar.metadata.0.name
+# resource "helm_release" "pulsar" {
+#   name = "pulsar"
+#   repository = "https://pulsar.apache.org/charts"
+#   chart = "pulsar"
+#   namespace = kubernetes_namespace.pulsar.metadata.0.name
+#   depends_on = [
+#     aws_eks_addon.ebs-csi
+#   ]
+
+#   values =[
+#     "${file("pulsar.yaml")}"
+#   ]
+#   timeout = 600
+# }
+
+resource "helm_release" "pulsar_operator" {
+  name       = "pulsar-operator"
+  repository = "https://charts.streamnative.io"
+  chart      = "pulsar-operator"
+  namespace = kubernetes_namespace.sns.metadata.0.name
+  timeout = 600
+}
+
+resource "helm_release" "vault_operator" {
+  name       = "vault-operator"
+  repository = "https://kubernetes-charts.banzaicloud.com"
+  chart      = "vault-operator"
+  namespace = kubernetes_namespace.sns.metadata.0.name
+  timeout = 600
+}
+
+resource "helm_release" "sn-platform" {
+  name = "sn-platform"
+  repository = "https://charts.streamnative.io"
+  chart = "sn-platform"
+  namespace = kubernetes_namespace.snp.metadata.0.name
   depends_on = [
-    aws_eks_addon.ebs-csi
+    helm_release.vault_operator,
+    helm_release.pulsar_operator,
+    module.eks.eks_managed_node_groups
   ]
 
   values =[
-    "${file("pulsar.yaml")}"
+    "${file("snp.yaml")}"
   ]
   timeout = 600
 }
