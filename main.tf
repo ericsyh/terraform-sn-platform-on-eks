@@ -128,12 +128,6 @@ resource "kubernetes_namespace" "snp" {
   }
 }
 
-# resource "kubernetes_namespace" "pulsar" {
-#   metadata {
-#     name = "pulsar"
-#   }
-# }
-
 provider "helm" {
   kubernetes {
     host                   = data.aws_eks_cluster.default.endpoint
@@ -141,21 +135,6 @@ provider "helm" {
     token = data.aws_eks_cluster_auth.default.token
   }
 }
-
-# resource "helm_release" "pulsar" {
-#   name = "pulsar"
-#   repository = "https://pulsar.apache.org/charts"
-#   chart = "pulsar"
-#   namespace = kubernetes_namespace.pulsar.metadata.0.name
-#   depends_on = [
-#     aws_eks_addon.ebs-csi
-#   ]
-
-#   values =[
-#     "${file("pulsar.yaml")}"
-#   ]
-#   timeout = 600
-# }
 
 resource "helm_release" "pulsar_operator" {
   name       = "pulsar-operator"
