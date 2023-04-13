@@ -1,0 +1,17 @@
+initialize: true
+
+components:
+  pulsar_detector: true
+  vault: true
+
+monitoring:
+  node_exporter: false
+  alert_manager: false
+
+auth:
+  authentication:
+    enabled: true
+  authorization:
+    enabled: true
+  vault:
+    enabled: true
