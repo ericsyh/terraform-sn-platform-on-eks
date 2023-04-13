@@ -46,7 +46,7 @@ module "eks" {
   version = "19.5.1"
 
   cluster_name    = local.cluster_name
-  cluster_version = "1.24"
+  cluster_version = "1.25"
 
   vpc_id                         = module.vpc.vpc_id
   subnet_ids                     = module.vpc.private_subnets
@@ -88,7 +88,7 @@ module "irsa-ebs-csi" {
 resource "aws_eks_addon" "ebs-csi" {
   cluster_name             = module.eks.cluster_name
   addon_name               = "aws-ebs-csi-driver"
-  addon_version            = "v1.5.2-eksbuild.1"
+  addon_version            = "v1.17.0-eksbuild.1"
   service_account_role_arn = module.irsa-ebs-csi.iam_role_arn
   tags = {
     "eks_addon" = "ebs-csi"
@@ -99,14 +99,16 @@ resource "aws_eks_addon" "ebs-csi" {
 data "aws_eks_cluster" "default" {
   name = module.eks.cluster_name
   depends_on = [
-    aws_eks_addon.ebs-csi
+    aws_eks_addon.ebs-csi,
+    module.eks.eks_managed_node_groups
   ]
 }
 
 data "aws_eks_cluster_auth" "default" {
   name = module.eks.cluster_name
   depends_on = [
-    aws_eks_addon.ebs-csi
+    aws_eks_addon.ebs-csi,
+    module.eks.eks_managed_node_groups
   ]
 }
 
@@ -159,12 +161,11 @@ resource "helm_release" "sn-platform" {
   namespace = kubernetes_namespace.snp.metadata.0.name
   depends_on = [
     helm_release.vault_operator,
-    helm_release.pulsar_operator,
-    module.eks.eks_managed_node_groups
+    helm_release.pulsar_operator
   ]
 
   values =[
     "${file("snp.yaml")}"
   ]
-  timeout = 600
+  timeout = 1500
 }
