@@ -7,5 +7,4 @@ variable "region" {
 variable "profile" {
   description = "AWS SSO profile"
   type        = string
-  default     = "snsa"
 }
