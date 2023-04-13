@@ -1,8 +1,8 @@
 initialize: true
 
 components:
-  pulsar_detector: false
-  vault: false
+  pulsar_detector: true
+  vault: true
 
 monitoring:
   node_exporter: false
@@ -10,8 +10,8 @@ monitoring:
 
 auth:
   authentication:
-    enabled: false
+    enabled: true
   authorization:
-    enabled: false
+    enabled: true
   vault:
-    enabled: false
+    enabled: true
