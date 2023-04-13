@@ -112,60 +112,22 @@ data "aws_eks_cluster_auth" "default" {
   ]
 }
 
-provider "kubernetes" {
+
+module "k8s" {
+  source ="./modules/k8s"
+
   host                   = data.aws_eks_cluster.default.endpoint
   cluster_ca_certificate =  base64decode(data.aws_eks_cluster.default.certificate_authority[0].data)
   token = data.aws_eks_cluster_auth.default.token
 }
 
-resource "kubernetes_namespace" "sns" {
-  metadata {
-    name = "sns"
-  }
-}
+module "helm" {
+  source = "./modules/helm"
 
-resource "kubernetes_namespace" "snp" {
-  metadata {
-    name = "snp"
-  }
-}
+  host                   = data.aws_eks_cluster.default.endpoint
+  cluster_ca_certificate =  base64decode(data.aws_eks_cluster.default.certificate_authority[0].data)
+  token = data.aws_eks_cluster_auth.default.token
 
-provider "helm" {
-  kubernetes {
-    host                   = data.aws_eks_cluster.default.endpoint
-    cluster_ca_certificate =  base64decode(data.aws_eks_cluster.default.certificate_authority[0].data)
-    token = data.aws_eks_cluster_auth.default.token
-  }
-}
-
-resource "helm_release" "pulsar_operator" {
-  name       = "pulsar-operator"
-  repository = "https://charts.streamnative.io"
-  chart      = "pulsar-operator"
-  namespace = kubernetes_namespace.sns.metadata.0.name
-  timeout = 600
-}
-
-resource "helm_release" "vault_operator" {
-  name       = "vault-operator"
-  repository = "https://kubernetes-charts.banzaicloud.com"
-  chart      = "vault-operator"
-  namespace = kubernetes_namespace.sns.metadata.0.name
-  timeout = 600
-}
-
-resource "helm_release" "sn-platform" {
-  name = "sn-platform"
-  repository = "https://charts.streamnative.io"
-  chart = "sn-platform"
-  namespace = kubernetes_namespace.snp.metadata.0.name
-  depends_on = [
-    helm_release.vault_operator,
-    helm_release.pulsar_operator
-  ]
-
-  values =[
-    "${file("snp.yaml")}"
-  ]
-  timeout = 1500
+  operator_namespace = module.k8s.operator_namespace
+  sn_platform_namespace = module.k8s.sn_platform_namespace
 }
