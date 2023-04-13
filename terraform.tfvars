@@ -1,2 +1,2 @@
-region = "us-west-2"
-profile = "snsa"
+region = "<your-aws-region>"
+profile = "<your-aws-profile>"
