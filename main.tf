@@ -112,7 +112,6 @@ data "aws_eks_cluster_auth" "default" {
   ]
 }
 
-
 module "k8s" {
   source ="./modules/k8s"
 
