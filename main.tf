@@ -100,7 +100,10 @@ data "aws_eks_cluster" "default" {
   name = module.eks.cluster_name
   depends_on = [
     aws_eks_addon.ebs-csi,
-    module.eks.eks_managed_node_groups
+    module.eks.eks_managed_node_groups,
+    module.vpc.enable_nat_gateway,
+    module.vpc.single_nat_gateway,
+    module.vpc.enable_dns_hostnames
   ]
 }
 
@@ -108,7 +111,10 @@ data "aws_eks_cluster_auth" "default" {
   name = module.eks.cluster_name
   depends_on = [
     aws_eks_addon.ebs-csi,
-    module.eks.eks_managed_node_groups
+    module.eks.eks_managed_node_groups,
+    module.vpc.enable_nat_gateway,
+    module.vpc.single_nat_gateway,
+    module.vpc.enable_dns_hostnames
   ]
 }
 

@@ -1,16 +1,5 @@
 initialize: true
 
-components:
-  vault: false
-
 monitoring:
   node_exporter: false
   alert_manager: false
-
-auth:
-  authentication:
-    enabled: false
-  authorization:
-    enabled: false
-  vault:
-    enabled: false
