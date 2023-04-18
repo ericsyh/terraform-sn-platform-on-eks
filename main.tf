@@ -102,9 +102,7 @@ data "aws_eks_cluster" "default" {
     aws_eks_addon.ebs-csi,
     module.eks.eks_managed_node_groups,
     module.vpc.enable_nat_gateway,
-    module.vpc.single_nat_gateway,
-    module.vpc.enable_dns_hostnames
-    
+    module.vpc.single_nat_gateway    
   ]
 }
 
@@ -114,8 +112,7 @@ data "aws_eks_cluster_auth" "default" {
     aws_eks_addon.ebs-csi,
     module.eks.eks_managed_node_groups,
     module.vpc.enable_nat_gateway,
-    module.vpc.single_nat_gateway,
-    module.vpc.enable_dns_hostnames
+    module.vpc.single_nat_gateway
   ]
 }
 
